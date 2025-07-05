@@ -1,0 +1,60 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_RECORDS 100
+
+typedef struct {
+    int id;
+    char data[256];
+} Record;
+
+void writeRecords(Record records[], int count) {
+    FILE *file = fopen("file_records.dat", "wb");
+    if (file == NULL) {
+        perror("Unable to open file");
+        exit(EXIT_FAILURE);
+    }
+    fwrite(records, sizeof(Record), count, file);
+    fclose(file);
+}
+
+void readRecords() {
+    Record records[MAX_RECORDS];
+    FILE *file = fopen("file_records.dat", "rb");
+    if (file == NULL) {
+        perror("Unable to open file");
+        exit(EXIT_FAILURE);
+    }
+    int count = fread(records, sizeof(Record), MAX_RECORDS, file);
+    fclose(file);
+
+    for (int i = 0; i < count; i++) {
+        printf("Record ID: %d, Data: %s\n", records[i].id, records[i].data);
+    }
+}
+
+int main() {
+    Record records[MAX_RECORDS];
+    int count;
+
+    printf("Enter number of records to write (max %d): ", MAX_RECORDS);
+    scanf("%d", &count);
+    if (count > MAX_RECORDS) {
+        printf("Exceeded maximum record limit.\n");
+        return EXIT_FAILURE;
+    }
+
+    for (int i = 0; i < count; i++) {
+        records[i].id = i + 1;
+        printf("Enter data for record %d: ", i + 1);
+        scanf("%s", records[i].data);
+    }
+
+    writeRecords(records, count);
+    printf("Records written to file.\n");
+
+    printf("Reading records from file:\n");
+    readRecords();
+
+    return 0;
+}
