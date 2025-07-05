@@ -1,0 +1,70 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100
+
+void cs_scan(int arr[], int head, int size, int direction) {
+    int seek_sequence[MAX], distance[MAX];
+    int count = 0, total_seek_time = 0, index = 0;
+
+    // Sort the request array
+    for (int i = 0; i < size; i++) {
+        for (int j = i + 1; j < size; j++) {
+            if (arr[i] > arr[j]) {
+                int temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+        }
+    }
+
+    // Find the index of the head
+    for (int i = 0; i < size; i++) {
+        if (head < arr[i]) {
+            index = i;
+            break;
+        }
+    }
+
+    // C-SCAN algorithm
+    if (direction == 1) {
+        for (int i = index; i < size; i++) {
+            seek_sequence[count++] = arr[i];
+        }
+        seek_sequence[count++] = 0; // Return to the beginning
+        for (int i = 0; i < index; i++) {
+            seek_sequence[count++] = arr[i];
+        }
+    } else {
+        for (int i = index - 1; i >= 0; i--) {
+            seek_sequence[count++] = arr[i];
+        }
+        seek_sequence[count++] = MAX - 1; // Go to the end
+        for (int i = size - 1; i >= index; i--) {
+            seek_sequence[count++] = arr[i];
+        }
+    }
+
+    // Calculate total seek time
+    for (int i = 0; i < count - 1; i++) {
+        distance[i] = abs(seek_sequence[i + 1] - seek_sequence[i]);
+        total_seek_time += distance[i];
+    }
+
+    // Output the results
+    printf("Seek Sequence: ");
+    for (int i = 0; i < count; i++) {
+        printf("%d ", seek_sequence[i]);
+    }
+    printf("\nTotal Seek Time: %d\n", total_seek_time);
+}
+
+int main() {
+    int arr[] = { 98, 183, 37, 122, 14, 124, 65, 67 };
+    int size = sizeof(arr) / sizeof(arr[0]);
+    int head = 53; // Initial head position
+    int direction = 1; // 1 for upward, 0 for downward
+
+    cs_scan(arr, head, size, direction);
+    return 0;
+}
