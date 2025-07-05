@@ -1,0 +1,74 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define FRAME_SIZE 4
+#define PAGE_SIZE 4
+#define TOTAL_PAGES 8
+
+int frames[FRAME_SIZE];
+int pageTable[TOTAL_PAGES];
+int pageFaults = 0;
+
+void initialize() {
+    for (int i = 0; i < FRAME_SIZE; i++) {
+        frames[i] = -1;
+    }
+    for (int i = 0; i < TOTAL_PAGES; i++) {
+        pageTable[i] = -1;
+    }
+}
+
+int findOptimalPage(int pages[], int currentIndex, int frameIndex) {
+    int farthest = currentIndex;
+    int optimalPage = -1;
+
+    for (int i = 0; i < FRAME_SIZE; i++) {
+        int j;
+        for (j = currentIndex; j < TOTAL_PAGES; j++) {
+            if (frames[i] == pages[j]) {
+                if (j > farthest) {
+                    farthest = j;
+                    optimalPage = i;
+                }
+                break;
+            }
+        }
+        if (j == TOTAL_PAGES) {
+            return i;
+        }
+    }
+    return optimalPage;
+}
+
+void optimalPaging(int pages[]) {
+    for (int i = 0; i < TOTAL_PAGES; i++) {
+        int page = pages[i];
+        int found = 0;
+
+        for (int j = 0; j < FRAME_SIZE; j++) {
+            if (frames[j] == page) {
+                found = 1;
+                break;
+            }
+        }
+
+        if (!found) {
+            int frameIndex = findOptimalPage(pages, i + 1, page);
+            if (frameIndex == -1) {
+                frameIndex = 0;
+            }
+            frames[frameIndex] = page;
+            pageFaults++;
+        }
+    }
+}
+
+int main() {
+    int pages[TOTAL_PAGES] = {0, 1, 2, 0, 3, 0, 4, 2};
+
+    initialize();
+    optimalPaging(pages);
+
+    printf("Total Page Faults: %d\n", pageFaults);
+    return 0;
+}
